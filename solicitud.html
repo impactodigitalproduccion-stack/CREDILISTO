@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitud de Crédito - CrediListo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-indigo-950 min-h-screen flex items-center justify-center p-4 font-sans">
+
+    <div class="bg-white w-full max-w-lg rounded-[40px] shadow-2xl overflow-hidden">
+        <div class="bg-indigo-700 p-8 text-white text-center">
+            <h1 class="text-3xl font-black italic tracking-tighter">CREDILISTO</h1>
+            <p class="text-[10px] uppercase tracking-[0.3em] opacity-70 mt-1">Solicitud de Crédito Digital</p>
+        </div>
+
+        <div class="p-8 space-y-5">
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[10px] font-black text-indigo-400 ml-2 uppercase">Nombre Completo</label>
+                    <input type="text" id="s_nom" placeholder="Ej: Juan Pérez" class="w-full p-4 border-2 border-slate-100 rounded-2xl bg-slate-50 outline-none focus:border-indigo-500 transition-all font-semibold">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-[10px] font-black text-indigo-400 ml-2 uppercase">DUI (Sin guiones)</label>
+                        <input type="text" id="s_dui" placeholder="000000000" class="w-full p-4 border-2 border-slate-100 rounded-2xl bg-slate-50 outline-none focus:border-indigo-500 transition-all text-center font-bold tracking-widest">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-indigo-400 ml-2 uppercase">WhatsApp / Tel</label>
+                        <input type="text" id="s_tel" placeholder="7777-7777" class="w-full p-4 border-2 border-slate-100 rounded-2xl bg-slate-50 outline-none focus:border-indigo-500 transition-all text-center font-bold">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-[10px] font-black text-indigo-400 ml-2 uppercase">Nombre de tu Negocio / Ocupación</label>
+                    <input type="text" id="s_neg" placeholder="Ej: Tienda 'La Bendición'" class="w-full p-4 border-2 border-slate-100 rounded-2xl bg-slate-50 outline-none focus:border-indigo-500 transition-all font-semibold">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-[10px] font-black text-indigo-400 ml-2 uppercase">Monto Solicitado</label>
+                        <select id="s_mon" class="w-full p-4 border-2 border-slate-100 rounded-2xl bg-white font-black text-indigo-700 outline-none focus:border-indigo-500 appearance-none">
+                            <option value="50">50.00 $</option>
+                            <option value="100" selected>100.00 $</option>
+                            <option value="200">200.00 $</option>
+                            <option value="300">300.00 $</option>
+                            <option value="500">500.00 $</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-indigo-400 ml-2 uppercase">¿Cómo pagarás?</label>
+                        <select id="s_fre" class="w-full p-4 border-2 border-slate-100 rounded-2xl bg-white font-bold outline-none focus:border-indigo-500 appearance-none">
+                            <option value="diario">Diario</option>
+                            <option value="semanal">Semanal</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-[10px] font-black text-indigo-400 ml-2 uppercase">Ingresos aprox. (Diaros o Quincenales)</label>
+                    <input type="number" id="s_ing" placeholder="Ej: 350" class="w-full p-4 border-2 border-slate-100 rounded-2xl bg-yellow-50 font-black text-indigo-900 outline-none focus:border-yellow-400">
+                </div>
+
+                <div>
+                    <label class="text-[10px] font-black text-indigo-400 ml-2 uppercase">¿Para qué usarás el dinero?</label>
+                    <textarea id="s_mot" placeholder="Inversión en mercadería, herramientas, etc..." class="w-full p-4 border-2 border-slate-100 rounded-2xl bg-slate-50 h-24 outline-none focus:border-indigo-500 transition-all text-sm font-medium"></textarea>
+                </div>
+            </div>
+
+            <button onclick="enviarSolicitud()" class="w-full bg-indigo-700 text-white font-black py-5 rounded-[25px] shadow-xl hover:bg-indigo-800 active:scale-95 transition-all text-xl uppercase tracking-tighter">
+                Enviar Mi Solicitud
+            </button>
+            
+            <p class="text-[10px] text-center text-slate-400 font-bold uppercase tracking-widest italic">Análisis inmediato por CrediListo</p>
+        </div>
+    </div>
+
+    <script>
+        function enviarSolicitud() {
+            // Recolección de datos
+            const nombre = document.getElementById('s_nom').value.trim();
+            const dui = document.getElementById('s_dui').value.trim();
+            const tel = document.getElementById('s_tel').value.trim();
+            const negocio = document.getElementById('s_neg').value.trim();
+            const monto = document.getElementById('s_mon').value;
+            const frecuencia = document.getElementById('s_fre').value;
+            const ingresos = document.getElementById('s_ing').value.trim();
+            const motivo = document.getElementById('s_mot').value.trim();
+
+            // Validación: No dejar pasar si faltan datos clave
+            if (!nombre || !dui || !tel || !ingresos) {
+                alert("⚠️ Por favor completa tu Nombre, DUI, Teléfono e Ingresos para procesar tu crédito.");
+                return;
+            }
+
+            // Crear el objeto de solicitud
+            const nuevaSolicitud = {
+                id: Date.now(),
+                nombre: nombre,
+                dui: dui,
+                tel: tel,
+                negocio: negocio,
+                monto: monto,
+                frecuencia: frecuencia,
+                ingresos: ingresos,
+                motivo: motivo,
+                fecha: new Date().toLocaleDateString()
+            };
+
+            // Guardar en la base de datos de solicitudes
+            let solicitudes = JSON.parse(localStorage.getItem('credilisto_solicitudes')) || [];
+            solicitudes.push(nuevaSolicitud);
+            localStorage.setItem('credilisto_solicitudes', JSON.stringify(solicitudes));
+
+            // Redirigir a la página de éxito pasando datos para el resumen
+            window.location.href = `enviado.html?monto=${monto}&frecuencia=${frecuencia}`;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrediListo - Panel Maestro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .modal { transition: opacity 0.25s ease; }
+        body.modal-active { overflow: hidden; }
+        .tab-active { border-bottom: 2px solid #4f46e5; color: #4f46e5; }
+    </style>
+</head>
+<body class="bg-slate-100 font-sans pb-20">
+
+    <div id="lock" class="fixed inset-0 bg-slate-900 z-[100] flex items-center justify-center p-6">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm text-center">
+            <div class="text-4xl mb-4">🔐</div>
+            <h1 class="text-2xl font-black italic text-indigo-900 mb-6 tracking-tighter">SISTEMA PRIVADO</h1>
+            
+            <div class="relative mb-4">
+                <input type="password" id="passMaster" 
+                       placeholder="Contraseña de Administrador" 
+                       class="w-full p-4 pr-12 border-2 border-slate-100 rounded-2xl text-center outline-none focus:border-indigo-600 bg-slate-50 font-bold">
+                
+                <button onclick="togglePass()" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-600 transition-colors">
+                    <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12.a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                    </svg>
+                </button>
+            </div>
+
+            <button onclick="checkPass()" class="w-full bg-indigo-700 text-white font-black py-4 rounded-2xl hover:bg-indigo-800 shadow-lg transition-all active:scale-95">
+                INGRESAR AHORA
+            </button>
+            <p id="errorPass" class="text-red-500 text-[10px] mt-4 hidden font-black uppercase tracking-widest">⚠️ Clave Incorrecta</p>
+        </div>
+    </div>
+
+    <div id="mainContent" class="hidden max-w-7xl mx-auto p-4 space-y-6">
+        
+        <header class="flex justify-between items-center bg-indigo-900 p-6 rounded-2xl text-white shadow-lg">
+            <div>
+                <h1 class="text-2xl font-black italic tracking-tighter">CREDILISTO PRO</h1>
+                <p id="globalBalance" class="text-indigo-300 text-[10px] font-bold uppercase tracking-widest italic"></p>
+            </div>
+            <button onclick="location.reload()" class="bg-white/10 hover:bg-red-500 px-4 py-2 rounded-xl text-xs font-bold transition-colors">Cerrar Sesión</button>
+        </header>
+
+        <div class="grid lg:grid-cols-4 gap-6">
+            
+            <div class="lg:col-span-1">
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-200">
+                    <h2 class="font-black text-indigo-900 mb-4 border-b pb-2 uppercase text-xs">Nuevo Cliente</h2>
+                    <div class="space-y-3">
+                        <input type="text" id="n" placeholder="Nombre" class="w-full p-2 border rounded-xl text-xs bg-slate-50 outline-none">
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" id="d" placeholder="DUI" class="p-2 border rounded-xl text-xs bg-slate-50 outline-none">
+                            <input type="text" id="t" placeholder="Tel" class="p-2 border rounded-xl text-xs bg-slate-50 outline-none">
+                        </div>
+                        <input type="text" id="neg" placeholder="Negocio" class="w-full p-2 border rounded-xl text-xs bg-slate-50 outline-none">
+                        <div class="grid grid-cols-2 gap-2">
+                            <select id="mon" class="p-2 border rounded-xl text-xs font-bold bg-white text-indigo-700 outline-none">
+                                <option value="50">50$</option><option value="100">100$</option><option value="200">200$</option><option value="500">500$</option>
+                            </select>
+                            <select id="fre" class="p-2 border rounded-xl text-xs bg-white outline-none">
+                                <option value="diario">Diario</option><option value="semanal">Semanal</option>
+                            </select>
+                        </div>
+                        <input type="text" id="cl" placeholder="Clave Cliente (1234)" class="w-full p-2 border rounded-xl text-xs bg-yellow-50 font-bold outline-none border-yellow-200">
+                        <button onclick="crearManual()" class="w-full bg-indigo-700 text-white font-black py-3 rounded-2xl mt-2 shadow-md hover:bg-indigo-800 transition">ACTIVAR CRÉDITO</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-3 space-y-6">
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-200">
+                    <div class="flex gap-6 border-b mb-6">
+                        <button onclick="tabSol('pendientes')" id="btnP" class="pb-2 text-xs font-black uppercase tab-active">📥 Pendientes</button>
+                        <button onclick="tabSol('observadas')" id="btnO" class="pb-2 text-xs font-black uppercase text-gray-400">🔍 Observadas</button>
+                        <button onclick="tabSol('rechazadas')" id="btnR" class="pb-2 text-xs font-black uppercase text-gray-400">🚫 Rechazadas</button>
+                    </div>
+                    <div id="contenedorSolicitudes" class="grid md:grid-cols-2 gap-4"></div>
+                </div>
+
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-200">
+                    <h2 class="font-black text-indigo-900 mb-4 uppercase text-xs tracking-widest italic">Cartera Activa</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs text-left">
+                            <thead class="text-gray-400 border-b">
+                                <tr><th class="p-3">Cliente</th><th>Total</th><th>Pagado</th><th>Saldo</th><th class="text-center">Acción</th></tr>
+                            </thead>
+                            <tbody id="listaClientes" class="divide-y"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalFicha" class="modal opacity-0 pointer-events-none fixed inset-0 flex items-center justify-center z-[110] p-4">
+        <div class="modal-overlay absolute inset-0 bg-gray-900/60 backdrop-blur-sm"></div>
+        <div class="modal-container bg-white w-full max-w-md mx-auto rounded-3xl shadow-2xl z-50 overflow-hidden p-8 relative">
+            <h2 class="text-2xl font-black text-indigo-900 mb-6 italic border-b pb-2">Ficha de Solicitud</h2>
+            <div id="datosFicha" class="space-y-4 text-sm text-slate-600"></div>
+            <div id="accionesFicha" class="grid grid-cols-1 gap-3 mt-8"></div>
+            <button onclick="cerrarFicha()" class="w-full mt-6 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Cerrar</button>
+        </div>
+    </div>
+
+    <script>
+        let db = JSON.parse(localStorage.getItem('credilisto_v1')) || [];
+        let solicitudes = JSON.parse(localStorage.getItem('credilisto_solicitudes')) || [];
+        let observadas = JSON.parse(localStorage.getItem('credilisto_obs')) || [];
+        let rechazadas = JSON.parse(localStorage.getItem('credilisto_rech')) || [];
+        let tabActual = 'pendientes';
+
+        // ACCESO
+        function togglePass() {
+            const input = document.getElementById('passMaster');
+            const icon = document.getElementById('eyeIcon');
+            if (input.type === "password") {
+                input.type = "text";
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />';
+            } else {
+                input.type = "password";
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12.a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />';
+            }
+        }
+
+        function checkPass() {
+            const pass = document.getElementById('passMaster').value.trim();
+            if(pass === "lazaroemanuel") {
+                document.getElementById('lock').classList.add('hidden');
+                document.getElementById('mainContent').classList.remove('hidden');
+                render();
+            } else {
+                document.getElementById('errorPass').classList.remove('hidden');
+                document.getElementById('passMaster').value = "";
+            }
+        }
+
+        document.getElementById('passMaster').addEventListener('keypress', (e) => { if(e.key === 'Enter') checkPass(); });
+
+        // NAVEGACIÓN TABS
+        function tabSol(tipo) {
+            tabActual = tipo;
+            ['btnP', 'btnO', 'btnR'].forEach(b => document.getElementById(b).classList.remove('tab-active', 'text-indigo-600'));
+            ['btnP', 'btnO', 'btnR'].forEach(b => document.getElementById(b).classList.add('text-gray-400'));
+            
+            const act = document.getElementById('btn' + tipo.charAt(0).toUpperCase());
+            act.classList.add('tab-active', 'text-indigo-600');
+            render();
+        }
+
+        // RENDERIZADO
+        function render() {
+            const sDiv = document.getElementById('contenedorSolicitudes');
+            sDiv.innerHTML = "";
+            let lista = (tabActual === 'pendientes') ? solicitudes : (tabActual === 'observadas' ? observadas : rechazadas);
+            
+            if(lista.length === 0) sDiv.innerHTML = "<p class='text-[10px] italic text-gray-400 col-span-2 text-center py-6'>Vacío.</p>";
+
+            lista.forEach((s, i) => {
+                sDiv.innerHTML += `
+                    <div class="bg-slate-50 p-4 rounded-2xl border flex justify-between items-center hover:shadow-sm">
+                        <div><p class="font-bold text-indigo-900 text-sm">${s.nombre}</p><p class="text-[9px] text-slate-500 uppercase font-bold">${s.monto}$ | ${s.frecuencia}</p></div>
+                        <button onclick="abrirFicha(${i})" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase">Ver</button>
+                    </div>`;
+            });
+
+            const cTable = document.getElementById('listaClientes');
+            cTable.innerHTML = "";
+            let saldoCalle = 0;
+            db.forEach(p => {
+                const pagado = p.cuotas.filter(c => c.pagada).reduce((acc, c) => acc + parseFloat(c.valorPagado), 0);
+                const saldo = p.total - pagado;
+                saldoCalle += saldo;
+                cTable.innerHTML += `<tr class="hover:bg-indigo-50/50 transition">
+                    <td class="p-3"><b>${p.nombre}</b><br><span class="text-[9px] text-gray-400 font-black">${p.dui}</span></td>
+                    <td class="font-bold">$${p.total.toFixed(2)}</td>
+                    <td class="text-green-600 font-bold">$${pagado.toFixed(2)}</td>
+                    <td class="text-red-600 font-bold">$${saldo.toFixed(2)}</td>
+                    <td class="text-center"><a href="gestionar.html?id=${p.id}" class="bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-lg text-[10px] font-black">GESTIONAR</a></td>
+                </tr>`;
+            });
+            document.getElementById('globalBalance').innerText = `TOTAL EN CALLE: $${saldoCalle.toFixed(2)}`;
+        }
+
+        // MODAL
+        function abrirFicha(index) {
+            let lista = (tabActual === 'pendientes') ? solicitudes : (tabActual === 'observadas' ? observadas : rechazadas);
+            const s = lista[index];
+            document.getElementById('datosFicha').innerHTML = `
+                <div class="grid grid-cols-2 gap-4">
+                    <div><p class="text-[9px] font-bold text-slate-400 uppercase">DUI</p><p class="font-bold">${s.dui}</p></div>
+                    <div><p class="text-[9px] font-bold text-slate-400 uppercase">TEL</p><p class="font-bold">${s.tel}</p></div>
+                </div>
+                <div><p class="text-[9px] font-bold text-slate-400 uppercase">NEGOCIO</p><p class="font-bold">${s.negocio}</p></div>
+                <div><p class="text-[9px] font-bold text-slate-400 uppercase">INGRESOS</p><p class="font-bold">$${s.ingresos}</p></div>
+                <div><p class="text-[9px] font-bold text-slate-400 uppercase">MOTIVO</p><p class="bg-slate-50 p-3 rounded-xl italic">${s.motivo || 'N/A'}</p></div>`;
+            
+            document.getElementById('accionesFicha').innerHTML = `
+                <button onclick="moverA('aprobar', ${index})" class="bg-green-600 text-white py-3 rounded-2xl text-xs font-black">✅ APROBAR</button>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="moverA('observar', ${index})" class="bg-amber-500 text-white py-3 rounded-2xl text-[10px] font-black uppercase">🔍 Observar</button>
+                    <button onclick="moverA('rechazar', ${index})" class="bg-red-500 text-white py-3 rounded-2xl text-[10px] font-black uppercase">🚫 Rechazar</button>
+                </div>`;
+            
+            document.getElementById('modalFicha').classList.remove('opacity-0', 'pointer-events-none');
+            document.body.classList.add('modal-active');
+        }
+
+        function cerrarFicha() {
+            document.getElementById('modalFicha').classList.add('opacity-0', 'pointer-events-none');
+            document.body.classList.remove('modal-active');
+        }
+
+        function moverA(destino, index) {
+            let listaOrigen = (tabActual === 'pendientes') ? solicitudes : (tabActual === 'observadas' ? observadas : rechazadas);
+            const item = listaOrigen[index];
+            
+            if(destino === 'aprobar') { procesarAprobacion(item); listaOrigen.splice(index, 1); } 
+            else if (destino === 'observar') { if(tabActual !== 'observadas') { observadas.push(item); listaOrigen.splice(index, 1); } } 
+            else if (destino === 'rechazar') { if(tabActual !== 'rechazadas') { rechazadas.push(item); listaOrigen.splice(index, 1); } }
+
+            localStorage.setItem('credilisto_solicitudes', JSON.stringify(solicitudes));
+            localStorage.setItem('credilisto_obs', JSON.stringify(observadas));
+            localStorage.setItem('credilisto_rech', JSON.stringify(rechazadas));
+            cerrarFicha(); render();
+        }
+
+        function procesarAprobacion(s) {
+            const total = parseFloat(s.monto) * 1.20;
+            const nC = s.frecuencia === 'diario' ? 30 : 4;
+            const vC = total / nC;
+            const cuotas = [];
+            for(let j=1; j<=nC; j++) {
+                let fV = new Date();
+                s.frecuencia === 'diario' ? fV.setDate(fV.getDate() + j) : fV.setDate(fV.getDate() + (j*7));
+                cuotas.push({ n: j, v: fV.toISOString().split('T')[0], pagada: false, fechaPago: null, valorPagado: vC });
+            }
+            db.push({ id: Date.now(), ...s, total, vCuota: vC, cuotas, nota: 'A', pass: s.pass || '1234' });
+            localStorage.setItem('credilisto_v1', JSON.stringify(db));
+        }
+
+        function crearManual() {
+            const m = {
+                nombre: document.getElementById('n').value.trim(),
+                dui: document.getElementById('d').value.trim(),
+                tel: document.getElementById('t').value.trim(),
+                negocio: document.getElementById('neg').value.trim(),
+                monto: document.getElementById('mon').value,
+                frecuencia: document.getElementById('fre').value,
+                pass: document.getElementById('cl').value.trim() || '1234'
+            };
+            if(!m.nombre || !m.dui) return alert("Nombre y DUI obligatorios");
+            procesarAprobacion(m);
+            alert("Cliente Activo");
+            location.reload();
+        }
+    </script>
+</body>
+</html>

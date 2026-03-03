@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitud Enviada - CrediListo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-indigo-950 min-h-screen flex items-center justify-center p-4 font-sans">
+
+    <div class="bg-white w-full max-w-md rounded-[40px] shadow-2xl overflow-hidden animate-bounce-short">
+        <div class="bg-green-500 p-8 text-white text-center">
+            <div class="bg-white/20 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span class="text-4xl">✅</span>
+            </div>
+            <h1 class="text-2xl font-black uppercase tracking-tighter">¡Solicitud Recibida!</h1>
+        </div>
+
+        <div class="p-8 text-center">
+            <p class="text-gray-500 text-sm mb-6">Hemos recibido tus datos correctamente. Un asesor de <span class="font-bold text-indigo-900 italic">CrediListo</span> te contactará pronto al número proporcionado.</p>
+            
+            <div class="bg-slate-50 rounded-3xl p-6 border border-dashed border-slate-300 mb-6">
+                <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Plan de Pago Estimado</h2>
+                
+                <div class="flex justify-between items-center mb-3">
+                    <span class="text-gray-600 text-sm">Monto solicitado:</span>
+                    <span id="resMonto" class="font-black text-indigo-900 text-lg"></span>
+                </div>
+                
+                <div class="flex justify-between items-center mb-3 border-t pt-3">
+                    <span class="text-gray-600 text-sm italic" id="txtCuota">Tu cuota diaria:</span>
+                    <span id="resCuota" class="font-black text-green-600 text-xl"></span>
+                </div>
+
+                <div class="flex justify-between items-center border-t pt-3">
+                    <span class="text-gray-600 text-sm">Total a pagar (con 20%):</span>
+                    <span id="resTotal" class="font-bold text-slate-400 text-sm"></span>
+                </div>
+            </div>
+
+            <p class="text-[10px] text-gray-400 mb-8 italic">* El monto final y la aprobación están sujetos a la verificación de tus datos por nuestro equipo.</p>
+
+            <a href="index.html" class="inline-block bg-slate-100 text-slate-500 font-bold px-8 py-3 rounded-2xl text-xs hover:bg-slate-200 transition">
+                VOLVER AL INICIO
+            </a>
+        </div>
+    </div>
+
+    <style>
+        @keyframes bounce-short {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-bounce-short { animation: bounce-short 2s ease-in-out infinite; }
+    </style>
+
+    <script>
+        // Lógica para capturar los datos de la URL y calcular
+        window.onload = function() {
+            const params = new URLSearchParams(window.location.search);
+            const monto = parseFloat(params.get('monto')) || 0;
+            const frecuencia = params.get('frecuencia') || 'diario';
+
+            const total = monto * 1.20;
+            const cuotas = (frecuencia === 'diario') ? 30 : 4;
+            const valorCuota = total / cuotas;
+
+            document.getElementById('resMonto').innerText = `$${monto.toFixed(2)}`;
+            document.getElementById('resCuota').innerText = `$${valorCuota.toFixed(2)}`;
+            document.getElementById('resTotal').innerText = `$${total.toFixed(2)}`;
+            document.getElementById('txtCuota').innerText = (frecuencia === 'diario') ? "Tu cuota diaria:" : "Tu cuota semanal:";
+        }
+    </script>
+</body>
+</html>

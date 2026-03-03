@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrediListo - Consultar Estado</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 min-h-screen flex flex-col items-center p-4">
+
+    <div id="loginC" class="bg-white p-8 rounded-[40px] shadow-2xl w-full max-w-sm border-t-8 border-indigo-700 mt-10">
+        <h1 class="text-3xl font-black text-indigo-900 text-center italic">CREDILISTO</h1>
+        <p class="text-center text-gray-400 text-[10px] mb-8 font-bold tracking-widest uppercase">Consulta de Pagos</p>
+        <div class="space-y-4">
+            <input type="text" id="duiC" placeholder="Tu DUI" class="w-full p-4 border rounded-2xl bg-gray-50 text-center font-bold tracking-widest outline-none focus:ring-2 focus:ring-indigo-600">
+            <input type="password" id="passC" placeholder="Contraseña (1234)" class="w-full p-4 border rounded-2xl bg-gray-50 text-center outline-none focus:ring-2 focus:ring-indigo-600">
+            <button onclick="consultar()" class="w-full bg-indigo-700 text-white font-black py-4 rounded-2xl shadow-lg hover:bg-indigo-800 transition">ENTRAR</button>
+            <p id="errC" class="text-red-500 text-[10px] hidden text-center font-bold uppercase">No se encontró información con esos datos.</p>
+        </div>
+    </div>
+
+    <div id="infoC" class="bg-white p-6 rounded-[35px] shadow-2xl w-full max-w-lg hidden animate-fade-in mt-4">
+        <div class="text-center border-b pb-4 mb-4">
+            <h2 id="nomC" class="text-2xl font-black text-indigo-900 uppercase"></h2>
+            <p class="text-[10px] text-indigo-500 font-bold uppercase tracking-widest">Estado de Cuenta Actual</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 mb-6">
+            <div class="bg-green-50 p-4 rounded-3xl text-center border border-green-100">
+                <p class="text-[9px] font-black text-green-700 uppercase tracking-widest">Has Pagado</p>
+                <p id="pagC" class="text-2xl font-black text-green-800"></p>
+            </div>
+            <div class="bg-red-50 p-4 rounded-3xl text-center border border-red-100">
+                <p class="text-[9px] font-black text-red-700 uppercase tracking-widest">Tu Saldo</p>
+                <p id="salC" class="text-2xl font-black text-red-800"></p>
+            </div>
+        </div>
+
+        <div class="bg-indigo-900 text-white p-4 rounded-2xl flex justify-between items-center mb-6 shadow-lg">
+            <span class="text-xs font-bold uppercase tracking-widest">Tu Calificación:</span>
+            <span id="notaC" class="text-3xl font-black italic"></span>
+        </div>
+
+        <h3 class="font-black text-gray-400 text-[10px] uppercase tracking-widest mb-3 ml-2">Tus últimos pagos registrados:</h3>
+        <div id="histC" class="space-y-2 max-h-52 overflow-y-auto pr-1"></div>
+        
+        <button onclick="location.reload()" class="w-full mt-6 text-gray-300 font-bold text-[10px] uppercase tracking-widest hover:text-indigo-600">Cerrar Sesión</button>
+    </div>
+
+    <script>
+        function consultar() {
+            const dui = document.getElementById('duiC').value;
+            const pass = document.getElementById('passC').value;
+            const data = JSON.parse(localStorage.getItem('credilisto_v1')) || [];
+            const p = data.find(x => x.dui === dui && x.pass === pass);
+
+            if(p) {
+                document.getElementById('loginC').classList.add('hidden');
+                document.getElementById('infoC').classList.remove('hidden');
+                document.getElementById('nomC').innerText = p.nombre;
+                const pag = p.cuotas.filter(c => c.pagada).length * p.vCuota;
+                const sal = p.total - pag;
+                document.getElementById('pagC').innerText = `$${pag.toFixed(2)}`;
+                document.getElementById('salC').innerText = `$${sal.toFixed(2)}`;
+                document.getElementById('notaC').innerText = p.nota;
+
+                let h = "";
+                p.cuotas.filter(c => c.pagada).reverse().forEach(c => {
+                    h += `<div class="bg-slate-50 p-4 rounded-2xl flex justify-between border-l-4 border-green-500 shadow-sm items-center">
+                            <span class="text-xs font-bold text-slate-600">CUOTA #${c.n}</span>
+                            <span class="text-[10px] font-black text-indigo-600">RECIBIDO: ${c.fechaPago}</span>
+                          </div>`;
+                });
+                document.getElementById('histC').innerHTML = h || `<p class="text-center text-gray-300 italic py-4">Sin pagos registrados todavía.</p>`;
+            } else {
+                document.getElementById('errC').classList.remove('hidden');
+            }
+        }
+    </script>
+</body>
+</html>

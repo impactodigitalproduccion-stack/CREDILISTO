@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrediListo - Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-4">
+    <div class="max-w-6xl mx-auto space-y-6">
+        <div class="bg-indigo-900 p-6 rounded-2xl text-white flex justify-between items-center shadow-lg">
+            <h1 class="text-2xl font-black italic">CREDILISTO ADMIN</h1>
+            <div id="global" class="text-xs font-bold bg-indigo-800 px-4 py-2 rounded-full text-yellow-400"></div>
+        </div>
+
+        <div class="bg-amber-50 p-6 rounded-2xl border border-amber-200">
+            <h2 class="font-black text-amber-800 mb-4 italic">🔔 SOLICITUDES ENTRANTE</h2>
+            <div id="listaSolicitudes" class="grid md:grid-cols-2 gap-4"></div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border">
+            <h2 class="font-black text-indigo-900 mb-4 italic uppercase text-sm tracking-widest">Cartera Activa</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-50 text-gray-400 uppercase text-[10px]">
+                        <tr><th class="p-3 text-left">Emprendedor</th><th>Inversión</th><th class="text-green-600">Cobrado</th><th class="text-red-600">Saldo</th><th class="text-center">Gestión</th></tr>
+                    </thead>
+                    <tbody id="listaClientes" class="divide-y"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let db = JSON.parse(localStorage.getItem('credilisto_v1')) || [];
+        let solicitudes = JSON.parse(localStorage.getItem('credilisto_solicitudes')) || [];
+
+        function render() {
+            const sDiv = document.getElementById('listaSolicitudes');
+            sDiv.innerHTML = solicitudes.length === 0 ? "<p class='text-xs italic text-amber-600'>Bandeja vacía.</p>" : "";
+            solicitudes.forEach((s, i) => {
+                sDiv.innerHTML += `<div class="bg-white p-4 rounded-xl border border-amber-200 shadow-sm flex justify-between items-center animate-pulse">
+                    <div><p class="font-bold text-sm uppercase">${s.nombre}</p><p class="text-[10px] text-indigo-600 font-bold">$${s.monto} | ${s.frecuencia} | Ingresos: $${s.ingresos}</p></div>
+                    <div class="flex gap-2"><button onclick="aprobar(${i})" class="bg-green-600 text-white px-3 py-1 rounded-lg text-xs font-bold">APROBAR</button>
+                    <button onclick="rechazar(${i})" class="text-red-400 text-xs font-bold">ELIMINAR</button></div></div>`;
+            });
+
+            const cTable = document.getElementById('listaClientes');
+            cTable.innerHTML = "";
+            let sCalle = 0;
+            db.forEach(p => {
+                const pag = p.cuotas.filter(c => c.pagada).length * p.vCuota;
+                const sal = p.total - pag;
+                sCalle += sal;
+                cTable.innerHTML += `<tr class="hover:bg-indigo-50 transition"><td class="p-3"><b>${p.nombre}</b><br><span class="text-[9px] text-gray-400 uppercase font-black">DUI: ${p.dui} | Negocio: ${p.negocio || 'N/A'}</span></td>
+                <td class="font-bold text-slate-500">$${p.total.toFixed(2)}</td><td class="font-bold text-green-600">$${pag.toFixed(2)}</td><td class="font-bold text-red-600">$${sal.toFixed(2)}</td>
+                <td class="text-center"><a href="gestionar.html?id=${p.id}" class="bg-indigo-700 text-white px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-tighter shadow-md">Cobrar / Editar</a></td></tr>`;
+            });
+            document.getElementById('global').innerText = `TOTAL EN CALLE: $${sCalle.toFixed(2)}`;
+        }
+
+        function aprobar(i) {
+            const s = solicitudes[i];
+            const total = parseFloat(s.monto) * 1.20;
+            const nC = s.frecuencia === 'diario' ? 30 : 4;
+            const vC = total / nC;
+            const cuotas = [];
+            for(let j=1; j<=nC; j++) {
+                let fV = new Date();
+                s.frecuencia === 'diario' ? fV.setDate(fV.getDate() + j) : fV.setDate(fV.getDate() + (j*7));
+                cuotas.push({ n: j, v: fV.toISOString().split('T')[0], pagada: false, fechaPago: null });
+            }
+            db.push({ id: Date.now(), nombre: s.nombre, dui: s.dui, negocio: s.negocio, monto: s.monto, total, vCuota: vC, cuotas, nota: 'A', pass: "1234", motivo: s.motivo });
+            solicitudes.splice(i, 1);
+            localStorage.setItem('credilisto_v1', JSON.stringify(db));
+            localStorage.setItem('credilisto_solicitudes', JSON.stringify(solicitudes));
+            render();
+            alert("¡Préstamo aprobado y activado!");
+        }
+
+        function rechazar(i) { if(confirm("¿Rechazar solicitud?")){ solicitudes.splice(i,1); localStorage.setItem('credilisto_solicitudes', JSON.stringify(solicitudes)); render(); } }
+        window.onload = render;
+    </script>
+</body>
+</html>
